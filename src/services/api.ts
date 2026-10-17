@@ -8,6 +8,7 @@ import type {
   Assessment, Attempt, AttendanceStatus, ClassRoom, Grade, Material, Page, Question,
   Role, Session, User,
 } from "@/lib/types";
+import { autoSessionTitle } from "@/lib/jalali";
 
 export class ApiError extends Error {}
 const delay = () => new Promise((r) => setTimeout(r, 120));
@@ -328,7 +329,7 @@ export interface SessionInput { date: string; title?: string; description?: stri
 export async function createSession(classId: string, input: SessionInput) {
   const { d } = await ownClass(classId);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date)) throw new ApiError("تاریخ جلسه نامعتبر است.");
-  const s: Session = { id: uid(), classId, date: input.date, title: input.title?.trim() || undefined, description: input.description?.trim() || undefined, files: input.files, createdAt: now() };
+  const s: Session = { id: uid(), classId, date: input.date, title: input.title?.trim() || autoSessionTitle(input.date), description: input.description?.trim() || undefined, files: input.files, createdAt: now() };
   d.sessions.push(s);
   persist();
   return s;
@@ -340,7 +341,7 @@ export async function updateSession(id: string, input: SessionInput) {
   await ownClass(s.classId);
   const removed = s.files.filter((f) => !input.files.some((n) => n.key === f.key));
   for (const f of removed) await files.remove(f.key).catch(() => undefined);
-  Object.assign(s, { date: input.date, title: input.title?.trim() || undefined, description: input.description?.trim() || undefined, files: input.files });
+  Object.assign(s, { date: input.date, title: input.title?.trim() || autoSessionTitle(input.date), description: input.description?.trim() || undefined, files: input.files });
   persist();
 }
 export async function deleteSession(id: string) {
@@ -432,6 +433,14 @@ export async function studentAssessments() {
     return { id: a.id, title: a.title, description: a.description, durationMin: a.durationMin, questionCount: a.questions.length,
       maxAttempts: a.maxAttempts, used, open: isOpen(a), endAt: a.endAt };
   });
+}
+
+/** Teachers see only the active assessment titles offered to their assigned students; never scores or answers. */
+export async function teacherAssessments() {
+  const { d, me } = await requireUser("teacher");
+  const studentIds = new Set(d.teacherStudents.filter((r) => r.teacherId === me.id).map((r) => r.studentId));
+  return d.assessments.filter((a) => a.status === "published" && a.active && d.users.some((u) => studentIds.has(u.id) && u.active && isTargeted(a, u)))
+    .map((a) => ({ id: a.id, title: a.title, description: a.description, questionCount: a.questions.length, endAt: a.endAt }));
 }
 
 /** Start or resume an attempt. Questions are returned WITHOUT scores. */
