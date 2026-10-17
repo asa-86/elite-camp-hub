@@ -10,8 +10,8 @@ export interface User {
   fullName: string;
   role: Role;
   active: boolean;
-  grade?: Grade;
-  studentCode?: string;
+  grade?: Grade | undefined;
+  studentCode?: string | undefined;
   createdAt: string;
 }
 
@@ -38,7 +38,7 @@ export interface FileRef {
 export interface ClassRoom {
   id: string;
   title: string;
-  description?: string;
+  description?: string | undefined;
   active: boolean;
   teacherId: string;
   createdAt: string;
@@ -52,8 +52,8 @@ export interface Session {
   id: string;
   classId: string;
   date: string; // ISO YYYY-MM-DD
-  title?: string;
-  description?: string;
+  title?: string | undefined;
+  description?: string | undefined;
   files: FileRef[];
   createdAt: string;
 }
@@ -78,8 +78,8 @@ export interface AttendanceLog {
 export interface Material {
   id: string;
   title: string;
-  description?: string;
-  category?: string;
+  description?: string | undefined;
+  category?: string | undefined;
   file: FileRef;
   published: boolean;
   createdAt: string;
@@ -105,13 +105,13 @@ export type AssessmentTarget =
 export interface Assessment {
   id: string;
   title: string;
-  description?: string;
-  instructions?: string;
+  description?: string | undefined;
+  instructions?: string | undefined;
   status: "draft" | "published";
   active: boolean;
-  startAt?: string;
-  endAt?: string;
-  durationMin?: number;
+  startAt?: string | undefined;
+  endAt?: string | undefined;
+  durationMin?: number | undefined;
   maxAttempts: number;
   target: AssessmentTarget;
   questions: Question[];
@@ -123,10 +123,10 @@ export interface Attempt {
   assessmentId: string;
   studentId: string;
   startedAt: string;
-  submittedAt?: string;
+  submittedAt?: string | undefined;
   answers: Record<string, string>;
-  score?: number;
-  maxScore?: number;
+  score?: number | undefined;
+  maxScore?: number | undefined;
 }
 
 export interface Page<T> {

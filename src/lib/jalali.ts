@@ -11,10 +11,10 @@ const BREAKS = [
 function jalCal(jy: number) {
   const gy = jy + 621;
   let leapJ = -14;
-  let jp = BREAKS[0];
+  let jp = BREAKS[0]!;
   let jump = 0;
   for (let i = 1; i < BREAKS.length; i++) {
-    const jm = BREAKS[i];
+    const jm = BREAKS[i]!;
     jump = jm - jp;
     if (jy < jm) break;
     leapJ = leapJ + div(jump, 33) * 8 + div(mod(jump, 33), 4);
@@ -91,12 +91,12 @@ export const JALALI_MONTHS = [
 const WEEKDAYS = ["یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه", "شنبه"];
 
 export function toFaDigits(v: string | number) {
-  return String(v).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]);
+  return String(v).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]!);
 }
 const pad = (n: number) => String(n).padStart(2, "0");
 
 function parseIso(iso: string) {
-  const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
+  const [y = 0, m = 1, d = 1] = iso.slice(0, 10).split("-").map(Number);
   return { y, m, d };
 }
 
@@ -109,7 +109,7 @@ export function formatJalali(iso: string | null | undefined) {
 }
 export function weekdayFa(iso: string) {
   const { y, m, d } = parseIso(iso);
-  return WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
+  return WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]!;
 }
 /** Full timestamp in Tehran time, Jalali calendar. */
 export function formatDateTimeFa(ts: string | null | undefined) {

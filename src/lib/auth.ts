@@ -12,8 +12,8 @@ export const HOME_BY_ROLE: Record<Role, "/admin" | "/teacher" | "/student"> = {
 /** Route guard for role layouts (client-only, ssr:false). UI gate only — data access is enforced in the API/RLS. */
 export function guardRole(role: Role) {
   const s = readSession();
-  if (!s) throw redirect({ to: "/login" });
-  if (s.role !== role) throw redirect({ to: HOME_BY_ROLE[s.role] });
+  if (!s) throw redirect({ to: "/login" as "/" });
+  if (s.role !== role) throw redirect({ to: HOME_BY_ROLE[s.role] as "/" });
 }
 
 export function useMe() {

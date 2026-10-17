@@ -16,7 +16,7 @@ export function AppShell({ role, nav }: { role: Role; nav: NavItem[] }) {
   const navigate = useNavigate();
   const doSignOut = async () => {
     await signOut();
-    navigate({ to: "/login", replace: true });
+    navigate({ to: "/login" as "/", replace: true });
   };
 
   const sidebar = (
@@ -34,7 +34,7 @@ export function AppShell({ role, nav }: { role: Role; nav: NavItem[] }) {
             key={String(n.to)}
             to={n.to}
             onClick={() => setOpen(false)}
-            activeOptions={{ exact: n.exact }}
+            activeOptions={{ exact: !!n.exact }}
             className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             activeProps={{ className: "bg-sidebar-primary! text-sidebar-primary-foreground! font-bold shadow-glow" }}
           >
