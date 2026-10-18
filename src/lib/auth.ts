@@ -24,7 +24,7 @@ export function useSignOut() {
   const qc = useQueryClient();
   return async () => {
     await qc.cancelQueries();
-    logout();
+    await logout();
     qc.clear();
   };
 }

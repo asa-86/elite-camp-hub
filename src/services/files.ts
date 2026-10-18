@@ -6,6 +6,7 @@
 //   DELETE {base}/files/{key}
 import { config } from "./config";
 import type { FileRef } from "@/lib/types";
+import { getSupabase } from "@/services/supabase";
 
 export const ALLOWED_MIME: Record<string, string> = {
   "application/pdf": "PDF",
@@ -55,11 +56,16 @@ const demoAdapter: FileAdapter = {
 
 function remoteAdapter(base: string): FileAdapter {
   const req = async (path: string, init: RequestInit, token?: string) => {
+    let accessToken = token;
+    if (!accessToken && config.dataMode === "supabase") {
+      const { data } = await getSupabase().auth.getSession();
+      accessToken = data.session?.access_token;
+    }
     let res: Response;
     try {
       res = await fetch(`${base}${path}`, {
         ...init,
-        headers: { ...(init.headers ?? {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        headers: { ...(init.headers ?? {}), ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) },
       });
     } catch {
       throw new FileError("ارتباط با سرور فایل برقرار نشد. لطفاً دوباره تلاش کنید.");

@@ -7,9 +7,9 @@ import { ROLE_LABEL, type Role } from "@/lib/types";
 import { config } from "@/services/config";
 import { cn } from "@/lib/utils";
 
-export interface NavItem { to: LinkProps["to"]; label: string; icon: ReactNode; exact?: boolean }
+export interface NavItem { to: NonNullable<LinkProps["to"]>; label: string; icon: ReactNode; exact?: boolean | undefined }
 
-export function AppShell({ role, nav }: { role: Role; nav: NavItem[] }) {
+export function AppShell({ role, nav, children }: { role: Role; nav: NavItem[]; children?: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { data: me } = useMe();
   const signOut = useSignOut();
@@ -75,7 +75,7 @@ export function AppShell({ role, nav }: { role: Role; nav: NavItem[] }) {
           </div>
         )}
         <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:py-10">
-          <Outlet />
+          {children ?? <Outlet />}
         </main>
       </div>
     </div>

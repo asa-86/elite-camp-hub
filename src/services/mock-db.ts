@@ -54,17 +54,17 @@ async function seed(): Promise<DB> {
     const salt = uid();
     credentials.push({ userId: u.id, salt, hash: await hashPassword(passwords[u.id] ?? "Student@1405", salt) });
   }
-  const teacherStudents: TeacherStudent[] = [
+  const teacherStudents: TeacherStudent[] = ([
     ["u-t1", "u-s1"], ["u-t1", "u-s2"], ["u-t1", "u-s3"], ["u-t2", "u-s1"], ["u-t2", "u-s4"],
-  ].map(([teacherId, studentId]) => ({ teacherId, studentId, createdAt: t }));
+  ] as const).map(([teacherId, studentId]) => ({ teacherId, studentId, createdAt: t }));
   const classes: ClassRoom[] = [
     { id: "c-1", title: "کلاس علوم", description: "آزمایش‌های علمی و تفکر نقادانه", active: true, teacherId: "u-t1", createdAt: t },
     { id: "c-2", title: "کلاس ریاضی پیشرفته", description: "حل مسئله و المپیاد", active: true, teacherId: "u-t1", createdAt: t },
     { id: "c-3", title: "کلاس ادبیات خلاق", active: true, teacherId: "u-t2", createdAt: t },
   ];
-  const classMembers: ClassMember[] = [
+  const classMembers: ClassMember[] = ([
     ["c-1", "u-s1"], ["c-1", "u-s2"], ["c-1", "u-s3"], ["c-2", "u-s1"], ["c-2", "u-s3"], ["c-3", "u-s1"], ["c-3", "u-s4"],
-  ].map(([classId, studentId]) => ({ classId, studentId }));
+  ] as const).map(([classId, studentId]) => ({ classId, studentId }));
   const sessions: Session[] = [
     { id: "se-1", classId: "c-1", date: daysAgo(14), title: "آشنایی با روش علمی", files: [], createdAt: t },
     { id: "se-2", classId: "c-1", date: daysAgo(7), description: "آزمایش چگالی مایعات", files: [], createdAt: t },

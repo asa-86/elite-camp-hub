@@ -33,7 +33,7 @@ function Frame({ role, title, children }: { role: Role; title: string; children:
   return <AppShell role={role} nav={nav}><div className="space-y-7"><div><p className="text-xs font-bold text-[#9a7c43]">پنل {role === "admin" ? "مدیریت" : role === "teacher" ? "معلم" : "دانش‌آموز"}</p><h1 className="mt-2 text-2xl font-black">{title}</h1><p className="mt-2 text-sm text-muted-foreground">خوش آمدید{me.data?.fullName ? `، ${me.data.fullName}` : ""}</p></div>{children}</div></AppShell>;
 }
 
-function Metric({ icon, label, value, hint }: { icon: ReactNode; label: string; value?: number; hint?: string }) {
+function Metric({ icon, label, value, hint }: { icon: ReactNode; label: string; value?: number | undefined; hint?: string | undefined }) {
   return <article className="rounded-2xl border border-[#eae7de] bg-white p-5 shadow-sm"><div className="flex items-center justify-between"><span className="text-sm font-semibold text-[#707587]">{label}</span><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#f2eddf] text-[#927544]">{icon}</span></div><p className="mt-4 text-3xl font-black">{value === undefined ? "…" : new Intl.NumberFormat("fa-IR").format(value)}</p>{hint && <p className="mt-1 text-xs text-[#9295a1]">{hint}</p>}</article>;
 }
 
