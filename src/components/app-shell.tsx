@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link, Outlet, useNavigate, type LinkProps } from "@tanstack/react-router";
-import { LogOut, Menu, X, FlaskConical } from "lucide-react";
+import { LogOut, Menu, X, FlaskConical, LayoutDashboard, GraduationCap, UserRound, Link2, LibraryBig, ClipboardList, ClipboardCheck, UsersRound } from "lucide-react";
 import { LogoMark } from "@/components/brand";
 import { useMe, useSignOut } from "@/lib/auth";
 import { ROLE_LABEL, type Role } from "@/lib/types";
@@ -9,8 +9,35 @@ import { cn } from "@/lib/utils";
 
 export interface NavItem { to: NonNullable<LinkProps["to"]>; label: string; icon: ReactNode; exact?: boolean | undefined }
 
+const dashboardNav: Record<Role, NavItem[]> = {
+  admin: [
+    { to: "/admin/", label: "نمای کلی", icon: <LayoutDashboard size={18} />, exact: true },
+    { to: "/admin/students", label: "دانش‌آموزان", icon: <GraduationCap size={18} /> },
+    { to: "/admin/teachers", label: "معلمان", icon: <UserRound size={18} /> },
+    { to: "/admin/assignments", label: "ارتباط‌ها", icon: <Link2 size={18} /> },
+    { to: "/admin/materials", label: "جزوه‌ها", icon: <LibraryBig size={18} /> },
+    { to: "/admin/assessments", label: "آزمون‌ها", icon: <ClipboardList size={18} /> },
+    { to: "/admin/assessment-results", label: "نتایج آزمون", icon: <ClipboardCheck size={18} /> },
+    { to: "/admin/attendance", label: "حضور و غیاب", icon: <ClipboardCheck size={18} /> },
+    { to: "/admin/settings", label: "تنظیمات حساب", icon: <UserRound size={18} /> },
+  ],
+  teacher: [
+    { to: "/teacher/", label: "داشبورد من", icon: <LayoutDashboard size={18} />, exact: true },
+    { to: "/teacher/classes/", label: "کلاس‌های من", icon: <UsersRound size={18} /> },
+    { to: "/teacher/assessments", label: "آزمون‌ها", icon: <ClipboardList size={18} /> },
+    { to: "/teacher/settings", label: "تنظیمات حساب", icon: <UserRound size={18} /> },
+  ],
+  student: [
+    { to: "/student/", label: "داشبورد من", icon: <LayoutDashboard size={18} />, exact: true },
+    { to: "/student/classes", label: "کلاس‌های من", icon: <UsersRound size={18} /> },
+    { to: "/student/assessments", label: "آزمون‌ها", icon: <ClipboardList size={18} /> },
+    { to: "/student/settings", label: "تنظیمات حساب", icon: <UserRound size={18} /> },
+  ],
+};
+
 export function AppShell({ role, nav, children }: { role: Role; nav: NavItem[]; children?: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const visibleNav = dashboardNav[role] ?? nav;
   const { data: me } = useMe();
   const signOut = useSignOut();
   const navigate = useNavigate();
@@ -29,7 +56,7 @@ export function AppShell({ role, nav, children }: { role: Role; nav: NavItem[]; 
         </div>
       </div>
       <nav className="flex-1 space-y-1 px-3" aria-label="منوی اصلی">
-        {nav.map((n) => (
+        {visibleNav.map((n) => (
           <Link
             key={String(n.to)}
             to={n.to}
