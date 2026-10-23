@@ -24,7 +24,7 @@ export function Logo({ light = false }: { light?: boolean }) {
       <span className={cn("leading-tight", light ? "text-ink-foreground" : "text-foreground")}>
         <span className="block text-[15px] font-extrabold">آرما</span>
         <span className={cn("block text-[11px] font-medium", light ? "text-ink-foreground/70" : "text-muted-foreground")}>
-          دانش‌آموزی
+          کمپ نخبگان
         </span>
       </span>
     </Link>
