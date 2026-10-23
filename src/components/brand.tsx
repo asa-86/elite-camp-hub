@@ -19,10 +19,10 @@ export function LogoMark({ className }: { className?: string }) {
 
 export function Logo({ light = false }: { light?: boolean }) {
   return (
-    <Link to="/" className="flex items-center gap-2.5" aria-label="کمپ نخبگان دانش‌آموزی - خانه">
+    <Link to="/" className="flex items-center gap-2.5" aria-label="آرما - خانه">
       <LogoMark />
       <span className={cn("leading-tight", light ? "text-ink-foreground" : "text-foreground")}>
-        <span className="block text-[15px] font-extrabold">کمپ نخبگان</span>
+        <span className="block text-[15px] font-extrabold">آرما</span>
         <span className={cn("block text-[11px] font-medium", light ? "text-ink-foreground/70" : "text-muted-foreground")}>
           دانش‌آموزی
         </span>

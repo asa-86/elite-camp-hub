@@ -5,11 +5,40 @@
 //     React/TanStack dedupe, error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { loadEnv } from "vite";
+
+const productionSiteUrl = loadEnv("production", process.cwd(), "VITE_")
+  .VITE_SITE_URL?.trim()
+  .replace(/\/$/, "");
 
 export default defineConfig({
+  // Publish static files only; the built site has no runtime Node/Nitro server.
+  nitro: false,
   tanstackStart: {
-    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-    // nitro/vite builds from this
+    // SPA mode serves dashboard routes from a static shell. The public home route
+    // is separately prerendered as /index.html for search and social crawlers.
+    spa: {
+      enabled: true,
+      // Use an existing route to generate the shell; TanStack only renders the
+      // root match while prerendering the shell, so this URL is just a mask.
+      maskPath: "/login",
+      prerender: { outputPath: "/_shell", crawlLinks: false },
+    },
+    pages: [
+      {
+        path: "/",
+        prerender: {
+          enabled: true,
+          outputPath: "/index.html",
+          crawlLinks: false,
+        },
+      },
+    ],
+    // A sitemap is emitted only when the production domain is configured.
+    sitemap: productionSiteUrl
+      ? { enabled: true, host: productionSiteUrl, outputPath: "sitemap.xml" }
+      : { enabled: false },
+    // Keep the custom server entry for build-time prerendering.
     server: { entry: "server" },
   },
 });

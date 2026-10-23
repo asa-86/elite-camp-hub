@@ -44,10 +44,15 @@ describe("demo role flows", () => {
     await expect(adminStats()).rejects.toThrow("نشست شما منقضی شده است");
   });
 
-  it("limits a teacher's class roster to assigned students and records attendance changes", async () => {
+  it("allows only admins to create assigned classes while teachers manage sessions and attendance", async () => {
     await login("teacher", "Teacher@1405");
-    await expect(createClass({ title: "کلاس نامجاز", active: true, memberIds: ["u-s5"] })).rejects.toThrow("فقط دانش‌آموزان اختصاص‌یافته");
-    const classroom = await createClass({ title: "کلاس آزمایشی", active: true, memberIds: ["u-s1"] });
+    await expect(createClass("u-t1", { title: "کلاس غیرمجاز", active: true, memberIds: ["u-s1"] })).rejects.toThrow("اجازه انجام این عملیات را ندارید");
+    logout();
+    await login("admin", "Admin@1405");
+    await expect(createClass("u-t1", { title: "کلاس نامعتبر", active: true, memberIds: ["u-s5"] })).rejects.toThrow("نامعتبر یا غیرفعال");
+    const classroom = await createClass("u-t1", { title: "کلاس آزمایشی", active: true, memberIds: ["u-s1"] });
+    logout();
+    await login("teacher", "Teacher@1405");
     const session = await createSession(classroom.id, { date: "2026-10-17", files: [] });
     expect(session.title).toMatch(/^جلسه /);
 

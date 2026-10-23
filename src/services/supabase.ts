@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { config } from "@/services/config";
+import type { Grade } from "@/lib/types";
 
 let client: SupabaseClient | null = null;
 
@@ -21,7 +22,7 @@ export interface ProfileRow {
   full_name: string;
   role: "admin" | "teacher" | "student";
   active: boolean;
-  grade: 7 | 8 | 9 | null;
+  grade: Grade | null;
   student_code: string | null;
   created_at: string;
 }

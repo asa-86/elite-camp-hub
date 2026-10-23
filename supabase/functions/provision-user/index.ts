@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
     const password = String(body.password ?? "");
     const grade = role === "student" ? Number(body.grade) : null;
     if (!/^[a-z0-9._]{3,32}$/.test(username) || !fullName || !["admin", "teacher", "student"].includes(role) || password.length < 8 || !/[A-Za-z]/.test(password) || !/\d/.test(password)) return json({ error: "اطلاعات حساب معتبر نیست." }, 400);
-    if (role === "student" && ![7, 8, 9].includes(grade)) return json({ error: "پایهٔ دانش‌آموز معتبر نیست." }, 400);
+    if (role === "student" && ![7, 8, 9, 10, 11, 12].includes(grade)) return json({ error: "پایهٔ دانش‌آموز معتبر نیست." }, 400);
     const { data: created, error: createError } = await admin.auth.admin.createUser({ email: `${username}@users.elitecamp.invalid`, password, email_confirm: true, user_metadata: { username } });
     if (createError || !created.user) return json({ error: "ایجاد حساب انجام نشد؛ نام کاربری ممکن است تکراری باشد." }, 409);
     const { data: profile, error: profileError } = await admin.from("profiles").insert({ id: created.user.id, username, full_name: fullName, role, grade, student_code: role === "student" ? (body.studentCode || null) : null, active: body.active !== false }).select("id,username,full_name,role,active,grade,student_code,created_at").single();

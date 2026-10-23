@@ -5,6 +5,6 @@ import { TeacherDashboard } from "@/components/role-dashboard";
 export const Route = createFileRoute("/teacher/")({
   ssr: false,
   beforeLoad: () => guardRole("teacher"),
-  head: () => ({ meta: [{ title: "داشبورد معلم | کمپ نخبگان دانش‌آموزی" }, { name: "robots", content: "noindex, nofollow" }] }),
+  head: () => ({ meta: [{ title: "داشبورد معلم | آرما" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: TeacherDashboard,
 });

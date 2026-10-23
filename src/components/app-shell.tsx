@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link, Outlet, useNavigate, type LinkProps } from "@tanstack/react-router";
-import { LogOut, Menu, X, FlaskConical, LayoutDashboard, GraduationCap, UserRound, Link2, LibraryBig, ClipboardList, ClipboardCheck, UsersRound } from "lucide-react";
+import { LogOut, Menu, X, FlaskConical, LayoutDashboard, GraduationCap, UserRound, Link2, LibraryBig, ClipboardList, ClipboardCheck, UsersRound, School } from "lucide-react";
 import { LogoMark } from "@/components/brand";
 import { useMe, useSignOut } from "@/lib/auth";
 import { ROLE_LABEL, type Role } from "@/lib/types";
@@ -11,9 +11,10 @@ export interface NavItem { to: NonNullable<LinkProps["to"]>; label: string; icon
 
 const dashboardNav: Record<Role, NavItem[]> = {
   admin: [
-    { to: "/admin/", label: "نمای کلی", icon: <LayoutDashboard size={18} />, exact: true },
+    { to: "/admin", label: "نمای کلی", icon: <LayoutDashboard size={18} />, exact: true },
     { to: "/admin/students", label: "دانش‌آموزان", icon: <GraduationCap size={18} /> },
     { to: "/admin/teachers", label: "معلمان", icon: <UserRound size={18} /> },
+    { to: "/admin/classes", label: "کلاس‌ها", icon: <School size={18} /> },
     { to: "/admin/assignments", label: "ارتباط‌ها", icon: <Link2 size={18} /> },
     { to: "/admin/materials", label: "جزوه‌ها", icon: <LibraryBig size={18} /> },
     { to: "/admin/assessments", label: "آزمون‌ها", icon: <ClipboardList size={18} /> },
@@ -22,13 +23,13 @@ const dashboardNav: Record<Role, NavItem[]> = {
     { to: "/admin/settings", label: "تنظیمات حساب", icon: <UserRound size={18} /> },
   ],
   teacher: [
-    { to: "/teacher/", label: "داشبورد من", icon: <LayoutDashboard size={18} />, exact: true },
-    { to: "/teacher/classes/", label: "کلاس‌های من", icon: <UsersRound size={18} /> },
+    { to: "/teacher", label: "داشبورد من", icon: <LayoutDashboard size={18} />, exact: true },
+    { to: "/teacher/classes", label: "کلاس‌های من", icon: <UsersRound size={18} /> },
     { to: "/teacher/assessments", label: "آزمون‌ها", icon: <ClipboardList size={18} /> },
     { to: "/teacher/settings", label: "تنظیمات حساب", icon: <UserRound size={18} /> },
   ],
   student: [
-    { to: "/student/", label: "داشبورد من", icon: <LayoutDashboard size={18} />, exact: true },
+    { to: "/student", label: "داشبورد من", icon: <LayoutDashboard size={18} />, exact: true },
     { to: "/student/classes", label: "کلاس‌های من", icon: <UsersRound size={18} /> },
     { to: "/student/assessments", label: "آزمون‌ها", icon: <ClipboardList size={18} /> },
     { to: "/student/settings", label: "تنظیمات حساب", icon: <UserRound size={18} /> },
@@ -51,7 +52,7 @@ export function AppShell({ role, nav, children }: { role: Role; nav: NavItem[]; 
       <div className="flex items-center gap-3 px-5 py-5">
         <LogoMark />
         <div className="leading-tight">
-          <div className="font-extrabold">کمپ نخبگان</div>
+          <div className="font-extrabold">آرما</div>
           <div className="text-xs text-sidebar-foreground/60">پنل {ROLE_LABEL[role]}</div>
         </div>
       </div>
@@ -81,7 +82,7 @@ export function AppShell({ role, nav, children }: { role: Role; nav: NavItem[]; 
   );
 
   return (
-    <div className="min-h-screen bg-background bg-dots">
+    <div className="dashboard-theme min-h-screen bg-background bg-dots">
       <aside className="fixed inset-y-0 right-0 hidden w-64 lg:block">{sidebar}</aside>
       <div className={cn("fixed inset-0 z-50 lg:hidden", open ? "pointer-events-auto" : "pointer-events-none")}>
         <div className={cn("absolute inset-0 bg-ink/50 transition-opacity", open ? "opacity-100" : "opacity-0")} onClick={() => setOpen(false)} />
@@ -93,7 +94,7 @@ export function AppShell({ role, nav, children }: { role: Role; nav: NavItem[]; 
       <div className="lg:pr-64">
         <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-background/85 px-4 py-3 backdrop-blur lg:hidden">
           <button onClick={() => setOpen(true)} aria-label="باز کردن منو" className="rounded-lg border p-2"><Menu className="h-5 w-5" /></button>
-          <span className="font-extrabold">کمپ نخبگان</span>
+          <span className="font-extrabold">آرما</span>
           <LogoMark className="h-8 w-8" />
         </header>
         {config.dataMode === "demo" && (
@@ -110,5 +111,5 @@ export function AppShell({ role, nav, children }: { role: Role; nav: NavItem[]; 
 }
 
 export const privateHead = (title: string) => ({
-  meta: [{ title: `${title} | کمپ نخبگان دانش‌آموزی` }, { name: "robots", content: "noindex, nofollow" }],
+  meta: [{ title: `${title} | آرما` }, { name: "robots", content: "noindex, nofollow" }],
 });

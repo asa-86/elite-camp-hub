@@ -8,6 +8,7 @@ import type {
   Assessment, Attempt, AttendanceStatus, ClassRoom, Grade, Material, Page, Question,
   Role, Session, User,
 } from "@/lib/types";
+import { GRADE_OPTIONS } from "@/lib/types";
 import { autoSessionTitle } from "@/lib/jalali";
 import { config } from "@/services/config";
 import { getSupabase, profileToUser, type ProfileRow } from "@/services/supabase";
@@ -182,6 +183,7 @@ export interface UserInput {
   fullName: string; username: string; role: Role; password?: string; active: boolean; grade?: Grade; studentCode?: string;
 }
 export async function createUser(input: UserInput): Promise<User> {
+  if (input.role === "student" && (!input.grade || !GRADE_OPTIONS.includes(input.grade))) throw new ApiError("پایهٔ دانش‌آموز را انتخاب کنید.");
   // Production: server function using the service role (admin-only, role verified server-side).
   if (config.dataMode === "supabase") {
     validatePassword(input.password ?? "");
@@ -213,6 +215,7 @@ export async function createUser(input: UserInput): Promise<User> {
 }
 
 export async function updateUser(id: string, patch: Partial<Omit<UserInput, "role" | "username">>) {
+  if (patch.grade !== undefined && !GRADE_OPTIONS.includes(patch.grade)) throw new ApiError("پایهٔ دانش‌آموز معتبر نیست.");
   if (config.dataMode === "supabase") {
     if (patch.password) {
       const { error } = await getSupabase().functions.invoke("admin-update-user", { body: { id, ...patch } });
@@ -317,6 +320,20 @@ export async function assign(teacherId: string, studentId: string) {
   const s = d.users.find((u) => u.id === studentId && u.role === "student");
   if (!t || !s) throw new ApiError("معلم یا دانش‌آموز نامعتبر است.");
   if (!teacherHasStudent(d, teacherId, studentId)) d.teacherStudents.push({ teacherId, studentId, createdAt: now() });
+  persist();
+}
+export async function assignMany(teacherId: string, studentIds: string[]) {
+  const ids = [...new Set(studentIds)];
+  if (!ids.length) return;
+  if (config.dataMode === "supabase") {
+    const { error } = await getSupabase().from("teacher_students").upsert(ids.map(student_id => ({ teacher_id: teacherId, student_id })), { onConflict: "teacher_id,student_id", ignoreDuplicates: true });
+    if (error) throw new ApiError("اختصاص دانش‌آموزان انجام نشد.");
+    return;
+  }
+  const { d } = await requireUser("admin");
+  if (!d.users.some(u => u.id === teacherId && u.role === "teacher")) throw new ApiError("معلم نامعتبر است.");
+  if (ids.some(id => !d.users.some(u => u.id === id && u.role === "student"))) throw new ApiError("یک یا چند دانش‌آموز نامعتبر هستند.");
+  for (const studentId of ids) if (!teacherHasStudent(d, teacherId, studentId)) d.teacherStudents.push({ teacherId, studentId, createdAt: now() });
   persist();
 }
 export async function unassign(teacherId: string, studentId: string) {
@@ -516,10 +533,11 @@ export interface ClassInput { title: string; description?: string; active: boole
 function checkMembers(d: DB, teacherId: string, ids: string[]) {
   for (const sid of ids) if (!teacherHasStudent(d, teacherId, sid)) throw new ApiError("فقط دانش‌آموزان اختصاص‌یافته به شما قابل افزودن هستند.");
 }
-export async function createClass(input: ClassInput) {
+export async function createClass(teacherId: string, input: ClassInput) {
   if (config.dataMode === "supabase") {
     if (!input.title.trim()) throw new ApiError("عنوان کلاس الزامی است.");
-    const { data: c, error } = await getSupabase().rpc("create_class_for_teacher", {
+    const { data: c, error } = await getSupabase().rpc("admin_create_class", {
+      p_teacher_id: teacherId,
       p_title: input.title.trim(),
       p_description: input.description?.trim() || null,
       p_active: input.active,
@@ -528,14 +546,49 @@ export async function createClass(input: ClassInput) {
     if (error || !c) throw new ApiError(error?.message || "ایجاد کلاس انجام نشد.");
     return { id: c.id, title: c.title, description: c.description ?? undefined, active: c.active, teacherId: c.teacher_id, createdAt: c.created_at } as ClassRoom;
   }
-  const { d, me } = await requireUser("teacher");
+  const { d } = await requireUser("admin");
   if (!input.title.trim()) throw new ApiError("عنوان کلاس الزامی است.");
-  checkMembers(d, me.id, input.memberIds);
-  const c: ClassRoom = { id: uid(), title: input.title.trim(), description: input.description?.trim() || undefined, active: input.active, teacherId: me.id, createdAt: now() };
+  if (!d.users.some((user) => user.id === teacherId && user.role === "teacher" && user.active)) throw new ApiError("معلم انتخاب‌شده معتبر یا فعال نیست.");
+  const selectedStudents = [...new Set(input.memberIds)];
+  if (selectedStudents.some((id) => !d.users.some((user) => user.id === id && user.role === "student" && user.active))) {
+    throw new ApiError("یک یا چند دانش‌آموز انتخاب‌شده نامعتبر یا غیرفعال هستند.");
+  }
+  for (const studentId of selectedStudents) {
+    if (!teacherHasStudent(d, teacherId, studentId)) d.teacherStudents.push({ teacherId, studentId, createdAt: now() });
+  }
+  const c: ClassRoom = { id: uid(), title: input.title.trim(), description: input.description?.trim() || undefined, active: input.active, teacherId, createdAt: now() };
   d.classes.push(c);
-  d.classMembers.push(...[...new Set(input.memberIds)].map((studentId) => ({ classId: c.id, studentId })));
+  d.classMembers.push(...selectedStudents.map((studentId) => ({ classId: c.id, studentId })));
   persist();
   return c;
+}
+
+export async function adminClasses(): Promise<ClassSummary[]> {
+  if (config.dataMode === "supabase") {
+    const db = getSupabase();
+    const { data: classes, error } = await db.from("classes").select("*").order("created_at", { ascending: false });
+    if (error) throw new ApiError("کلاس‌ها دریافت نشدند.");
+    const ids = (classes ?? []).map((c) => c.id);
+    const [{ data: members }, { data: sessions }] = await Promise.all([
+      ids.length ? db.from("class_students").select("class_id").in("class_id", ids) : Promise.resolve({ data: [], error: null }),
+      ids.length ? db.from("sessions").select("class_id,session_date").in("class_id", ids) : Promise.resolve({ data: [], error: null }),
+    ]);
+    const today = new Date().toISOString().slice(0, 10);
+    return (classes ?? []).map((c) => {
+      const classSessions = (sessions ?? []).filter((session) => session.class_id === c.id);
+      return {
+        id: c.id, title: c.title, description: c.description ?? undefined, active: c.active,
+        teacherId: c.teacher_id, createdAt: c.created_at,
+        memberCount: (members ?? []).filter((member) => member.class_id === c.id).length,
+        upcoming: classSessions.filter((session) => session.session_date > today).length,
+        held: classSessions.filter((session) => session.session_date <= today).length,
+      };
+    });
+  }
+  const { d } = await requireUser("admin");
+  return d.classes.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map((c) => ({
+    ...classSummary(d, c), teacherName: d.users.find((user) => user.id === c.teacherId)?.fullName ?? "",
+  }));
 }
 export async function updateClass(id: string, input: ClassInput) {
   if (config.dataMode === "supabase") {
@@ -1003,6 +1056,7 @@ export async function saveAssessment(input: Omit<Assessment, "id" | "createdAt">
     if (!input.title.trim()) throw new ApiError("عنوان آزمون الزامی است.");
     if (input.maxAttempts < 1) throw new ApiError("تعداد تلاش مجاز باید حداقل ۱ باشد.");
     if (input.startAt && input.endAt && input.startAt > input.endAt) throw new ApiError("زمان پایان باید بعد از زمان شروع باشد.");
+    if (input.target.type === "grades" && input.target.grades.length === 0) throw new ApiError("حداقل یک پایه را برای آزمون انتخاب کنید.");
     if (input.status === "published" && (!input.questions.length || input.questions.some((q) => !q.text.trim() || q.options.length < 2 || q.options.some((o) => !o.text.trim())))) throw new ApiError("برای انتشار، حداقل یک پرسش کامل با دو گزینه لازم است.");
     const db = getSupabase(); const actorId = await currentUserId();
     if (input.id) {
@@ -1044,6 +1098,7 @@ export async function saveAssessment(input: Omit<Assessment, "id" | "createdAt">
   if (!input.title.trim()) throw new ApiError("عنوان آزمون الزامی است.");
   if (input.maxAttempts < 1) throw new ApiError("تعداد تلاش مجاز باید حداقل ۱ باشد.");
   if (input.startAt && input.endAt && input.startAt > input.endAt) throw new ApiError("زمان پایان باید بعد از زمان شروع باشد.");
+  if (input.target.type === "grades" && input.target.grades.length === 0) throw new ApiError("حداقل یک پایه را برای آزمون انتخاب کنید.");
   if (input.status === "published") {
     if (!input.questions.length) throw new ApiError("برای انتشار، حداقل یک سؤال لازم است.");
     for (const q of input.questions) {

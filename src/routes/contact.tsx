@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowUpLeft, MessageCircle, UserPlus } from "lucide-react";
 import { Logo } from "@/components/brand";
 
 export const Route = createFileRoute("/contact")({
-  head: () => ({ meta: [{ title: "ارتباط با ما | کمپ نخبگان دانش‌آموزی" }, { name: "robots", content: "index, follow" }] }),
+  head: () => ({ meta: [{ title: "ارتباط با ما | آرما" }, { name: "robots", content: "index, follow" }] }),
   component: ContactPage,
 });
 

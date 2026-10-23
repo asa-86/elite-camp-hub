@@ -5,6 +5,6 @@ import { AdminDashboard } from "@/components/role-dashboard";
 export const Route = createFileRoute("/admin/")({
   ssr: false,
   beforeLoad: () => guardRole("admin"),
-  head: () => ({ meta: [{ title: "داشبورد مدیر | کمپ نخبگان دانش‌آموزی" }, { name: "robots", content: "noindex, nofollow" }] }),
+  head: () => ({ meta: [{ title: "داشبورد مدیر | آرما" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: AdminDashboard,
 });

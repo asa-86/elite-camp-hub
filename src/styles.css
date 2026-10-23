@@ -1,3 +1,4 @@
+@import url("https://cdn.jsdelivr.net/gh/rastikerdar/sahel-font@v3.4.0/dist/font-face.css");
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -5,8 +6,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Vazirmatn", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Vazirmatn", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Sahel", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Sahel", ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -111,11 +112,58 @@
   html {
     font-family: var(--font-sans);
   }
+  button,
+  input,
+  optgroup,
+  select,
+  textarea {
+    font: inherit;
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     -webkit-font-smoothing: antialiased;
   }
+}
+
+/* Login and dashboards use their own palette; public pages keep the site theme. */
+.dashboard-theme,
+.login-theme {
+  --background: #fbf7fc;
+  --foreground: #38254a;
+  --card: #fff;
+  --card-foreground: #38254a;
+  --popover: #fff;
+  --popover-foreground: #38254a;
+  --primary: #75449a;
+  --primary-foreground: #fff;
+  --secondary: #f3e8f5;
+  --secondary-foreground: #563769;
+  --muted: #f3edf6;
+  --muted-foreground: #74677f;
+  --accent: #e8a4d0;
+  --accent-foreground: #482552;
+  --gold: #df91c2;
+  --ink: #352142;
+  --ink-foreground: #fff8ff;
+  --border: #eadfed;
+  --input: #e7dce9;
+  --ring: #bd80c8;
+  --sidebar: #2d1d3b;
+  --sidebar-foreground: #f8effa;
+  --sidebar-primary: #efacd6;
+  --sidebar-primary-foreground: #3c2148;
+  --sidebar-accent: #432d54;
+  --sidebar-accent-foreground: #fff8ff;
+  --sidebar-border: #563e66;
+  --sidebar-ring: #e8a4d0;
+  --shadow-soft: 0 1px 2px rgb(61 36 74 / 5%), 0 8px 24px -12px rgb(83 45 104 / 20%);
+  --shadow-glow: 0 10px 38px -14px rgb(232 164 208 / 65%);
+}
+
+.dashboard-theme {
+  background-image: radial-gradient(ellipse at 85% 0%, rgb(231 195 232 / 22%), transparent 35%),
+    radial-gradient(ellipse at 10% 80%, rgb(246 215 235 / 25%), transparent 32%);
 }
 
 @utility bg-hero {

@@ -22,7 +22,11 @@ Deno.serve(async (req) => {
     const patch: Record<string, unknown> = {};
     if (typeof body.fullName === "string") patch.full_name = body.fullName.trim();
     if (typeof body.active === "boolean") patch.active = body.active;
-    if (target.role === "student" && [7, 8, 9].includes(Number(body.grade))) patch.grade = Number(body.grade);
+    if (target.role === "student" && body.grade !== undefined) {
+      const grade = Number(body.grade);
+      if (![7, 8, 9, 10, 11, 12].includes(grade)) return json({ error: "پایهٔ دانش‌آموز معتبر نیست." }, 400);
+      patch.grade = grade;
+    }
     if (target.role === "student" && typeof body.studentCode === "string") patch.student_code = body.studentCode.trim() || null;
     if (body.password) {
       const password = String(body.password);

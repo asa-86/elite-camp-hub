@@ -1,7 +1,8 @@
 // Domain types — mirror the planned database tables (see docs/DATABASE.md).
 
 export type Role = "admin" | "teacher" | "student";
-export type Grade = 7 | 8 | 9;
+export type Grade = 7 | 8 | 9 | 10 | 11 | 12;
+export const GRADE_OPTIONS: Grade[] = [7, 8, 9, 10, 11, 12];
 export type AttendanceStatus = "present" | "absent" | "excused";
 
 export interface User {
@@ -141,7 +142,14 @@ export const ROLE_LABEL: Record<Role, string> = {
   teacher: "معلم",
   student: "دانش‌آموز",
 };
-export const GRADE_LABEL: Record<Grade, string> = { 7: "پایه هفتم", 8: "پایه هشتم", 9: "پایه نهم" };
+export const GRADE_LABEL: Record<Grade, string> = {
+  7: "پایه هفتم",
+  8: "پایه هشتم",
+  9: "پایه نهم",
+  10: "پایه دهم",
+  11: "پایه یازدهم",
+  12: "پایه دوازدهم",
+};
 export const ATTENDANCE_LABEL: Record<AttendanceStatus, string> = {
   present: "حاضر",
   absent: "غایب",

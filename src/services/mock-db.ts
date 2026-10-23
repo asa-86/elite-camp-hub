@@ -45,6 +45,9 @@ async function seed(): Promise<DB> {
     { id: "u-s3", username: "student3", fullName: "پارسا جعفری", role: "student", grade: 9, studentCode: "۱۴۰۳", active: true, createdAt: t },
     { id: "u-s4", username: "student4", fullName: "هلیا موسوی", role: "student", grade: 7, studentCode: "۱۴۰۴", active: true, createdAt: t },
     { id: "u-s5", username: "student5", fullName: "کیان نوری", role: "student", grade: 9, studentCode: "۱۴۰۵", active: false, createdAt: t },
+    { id: "u-s6", username: "student6", fullName: "رها کریمی", role: "student", grade: 10, studentCode: "۱۴۰۶", active: true, createdAt: t },
+    { id: "u-s7", username: "student7", fullName: "پارسا شریفی", role: "student", grade: 11, studentCode: "۱۴۰۷", active: true, createdAt: t },
+    { id: "u-s8", username: "student8", fullName: "هستی رضایی", role: "student", grade: 12, studentCode: "۱۴۰۸", active: true, createdAt: t },
   ];
   const passwords: Record<string, string> = {
     "u-admin": "Admin@1405", "u-t1": "Teacher@1405", "u-t2": "Teacher@1405",
